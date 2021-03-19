@@ -34,6 +34,10 @@ const generateId = () => {
   return randomInt(500000);
 }
 
+const exists = (name) => {
+  return numbers.find(number => number.name === name);
+}
+
 app.get('/', (request, response) => {
   response.send('<h1>Hello World!</h1>');
 });
@@ -76,16 +80,26 @@ app.delete('/api/persons/:id', (request, response) => {
 app.post('/api/persons', (request, response) => {
   const body = request.body;
 
-  if(!body.content)
+  if(!body.name)
   {
     return response.status(400).json({
-      error: 'content missing'
+      error: 'name missing'
+    });
+  }else if(!body.number)
+  {
+    return response.status(400).json({
+      error: 'number missing'
+    });
+  }else if(exists(body.name))
+  {
+    return response.status(400).json({
+      error: 'name must be unique'
     });
   }
 
   const number = {
-    name: body.content,
-    number: body.important || false,
+    name: body.name,
+    number: body.number,
     id: generateId()
   }
 

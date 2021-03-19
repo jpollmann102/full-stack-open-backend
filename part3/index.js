@@ -35,16 +35,28 @@ app.get('/', (request, response) => {
   response.send('<h1>Hello World!</h1>');
 });
 
+app.get('/info', (request, response) => {
+  const content = `
+    <div>
+      <p>Phonebook has info for ${numbers.length} people</p>
+    </div>
+    <div>
+      <p>${new Date()}</p>
+    </div>
+  `
+  response.send(content);
+});
+
 app.get('/api/persons', (request, response) => {
   response.json(numbers);
 });
 
 app.get('/api/persons/:id', (request, response) => {
   const id = request.params.id;
-  const note = numbers.find(note => note.id == id);
-  if(note)
+  const number = numbers.find(number => number.id == id);
+  if(number)
   {
-    response.json(note);
+    response.json(number);
   }else
   {
     response.status(404).end();
@@ -53,7 +65,7 @@ app.get('/api/persons/:id', (request, response) => {
 
 app.delete('/api/persons/:id', (request, response) => {
   const id = request.params.id;
-  numbers = numbers.filter(note => note.id != id);
+  numbers = numbers.filter(number => number.id != id);
 
   response.status(204).end();
 });
@@ -68,16 +80,15 @@ app.post('/api/persons', (request, response) => {
     });
   }
 
-  const note = {
-    content: body.content,
-    important: body.important || false,
-    date: new Date(),
+  const number = {
+    name: body.content,
+    number: body.important || false,
     id: generateId()
   }
 
-  numbers = numbers.concat(note);
+  numbers = numbers.concat(number);
 
-  response.json(note);
+  response.json(number);
 });
 
 const PORT = 3001;

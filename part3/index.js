@@ -26,9 +26,12 @@ let numbers = [
   }
 ]
 
+const randomInt = (ceiling) => {
+  return Math.floor(Math.random() * Math.floor(ceiling));
+}
+
 const generateId = () => {
-  const maxId = numbers.length > 0 ? Math.max(...numbers.map(n => n.id)) : 0
-  return maxId + 1;
+  return randomInt(500000);
 }
 
 app.get('/', (request, response) => {

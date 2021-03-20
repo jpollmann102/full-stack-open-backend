@@ -99,3 +99,18 @@ describe('favorite blogs', () => {
     expect(result).toEqual(biggerList[2]);
   });
 });
+
+// describe('most blogs', () => {
+//   test('of empty list is nothing', () => {
+//
+//   });
+//
+//   test('when list has only one blog, equals that author', () => {
+//
+//   });
+//
+//   test('of a bigger list is equal to the right author', () => {
+//     const result = listHelper.mostBlogs(biggerList);
+//     // expect(result).toEqual({ author:})
+//   });
+// });

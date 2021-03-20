@@ -7,7 +7,6 @@ const logger = require('./utils/logger');
 const mongoose = require('mongoose');
 
 logger.info('connecting to', config.MONGO_DB_URL);
-const url = process.env.MONGO_DB_URL;
 
 // connect to our cluster and database
 mongoose.connect(config.MONGO_DB_URL, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true })
@@ -19,6 +18,7 @@ mongoose.connect(config.MONGO_DB_URL, { useNewUrlParser: true, useUnifiedTopolog
 });
 
 const app = express();
+require('express-async-errors');
 
 app.use(cors());
 app.use(express.static('build'));

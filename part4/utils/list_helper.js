@@ -1,3 +1,5 @@
+const _ = require('lodash');
+
 const dummy = (blogs) => {
   return 1;
 }
@@ -13,6 +15,13 @@ const favoriteBlog = (blogs) => {
   }, {});
   return maxItem;
 }
+
+// const mostBlogs = (blogs) => {
+//   const authorArray = _.map(blogs, 'author');
+//   const mostCommonAuthor = _.chain(authorArray).countBy().sortBy().max(_.last).value();
+//   console.log(mostCommonAuthor);
+//   return mostCommonAuthor;
+// }
 
 module.exports = {
   dummy,

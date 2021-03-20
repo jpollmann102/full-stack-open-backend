@@ -22,7 +22,7 @@ app.get('/info', (request, response) => {
       <div>
         <p>${new Date()}</p>
       </div>
-    `
+    `;
     response.send(content);
   });
 });
@@ -111,7 +111,7 @@ const errorHandler = (error, request, response, next) => {
   }
 
   next(error);
-}
+};
 
 app.use(errorHandler);
 

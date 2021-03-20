@@ -9,6 +9,24 @@ app.use(express.json());
 app.use(morgan('tiny'));
 app.use(express.static('build'));
 
+app.get('/', (request, response) => {
+  response.send('<h1>Hello World!</h1>');
+});
+
+app.get('/info', (request, response) => {
+  Number.countDocuments({}, (err, count) => {
+    const content = `
+      <div>
+        <p>Phonebook has info for ${count} people</p>
+      </div>
+      <div>
+        <p>${new Date()}</p>
+      </div>
+    `
+    response.send(content);
+  });
+});
+
 app.get('/api/persons', (request, response) => {
   Number.find({}).then(numbers => {
     response.json(numbers);

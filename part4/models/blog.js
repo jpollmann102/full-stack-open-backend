@@ -11,6 +11,10 @@ const blogSchema = new mongoose.Schema({
     required: false,
     default: "Anonymous"
   },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
   url: {
     type: String,
     required: true

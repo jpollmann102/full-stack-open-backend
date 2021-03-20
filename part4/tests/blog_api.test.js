@@ -1,10 +1,17 @@
 const mongoose = require('mongoose');
 const supertest = require('supertest');
-const helper = require('./test_helper');
+const helper = require('./blog_test_helper');
 const Blog = require('../models/blog');
 const app = require('../app');
 
 const api = supertest(app);
+
+let authToken = '';
+
+beforeAll(async () => {
+  const authResponse = await api.post('/api/login').send({ username: 'root', password: 'secret' });
+  authToken = authResponse.body.token;
+});
 
 beforeEach(async () => {
   await Blog.deleteMany({});
@@ -54,7 +61,7 @@ describe('viewing a specific note', () => {
   test('succeeds with valid id', async () => {
     const blogs = await helper.blogsInDb();
 
-    const blogToView = blogs[0];
+    const blogToView = {...blogs[0], user.id = '605666e695d5da69f4ffb1e8', user.username = 'root'};
 
     const resultBlog = await api
       .get(`/api/blogs/${blogToView.id}`)
@@ -75,14 +82,6 @@ describe('viewing a specific note', () => {
 
   });
 
-  test('fails with statuscode 400 if id is invalid', async () => {
-    const invalidId = '5a3d5da59070081a82a3445';
-
-    await api
-      .get(`/api/blogs/${invalidId}`)
-      .expect(400);
-
-  });
 });
 
 describe('addition of a new note', () => {
@@ -91,11 +90,14 @@ describe('addition of a new note', () => {
       title: "A new test note",
       author: "A test author",
       url: "atesturl.com",
-      likes: 9
+      likes: 9,
+      userId: "605666e695d5da69f4ffb1e8"
     };
 
+    console.log(authToken);
     await api
         .post('/api/blogs')
+        .set('Authorization', authToken)
         .send(newBlog)
         .expect(201)
         .expect('Content-Type', /application\/json/);
@@ -114,10 +116,12 @@ describe('addition of a new note', () => {
       title: "A new test note without likes",
       author: "A test author",
       url: "atesturl.com",
+      userId: "605666e695d5da69f4ffb1e8"
     };
 
     await api
         .post('/api/blogs')
+        .set('Authorization', authToken)
         .send(newBlog)
         .expect(201)
         .expect('Content-Type', /application\/json/);
@@ -135,10 +139,12 @@ describe('addition of a new note', () => {
     const newBlog = {
       author: "A test author",
       url: "atesturl.com",
+      userId: "605666e695d5da69f4ffb1e8"
     };
 
     await api
         .post('/api/blogs')
+        .set('Authorization', authToken)
         .send(newBlog)
         .expect(400);
 
@@ -152,10 +158,12 @@ describe('addition of a new note', () => {
     const newBlog = {
       title: "A test title",
       author: "A test author",
+      userId: "605666e695d5da69f4ffb1e8"
     };
 
     await api
         .post('/api/blogs')
+        .set('Authorization', authToken)
         .send(newBlog)
         .expect(400);
 
@@ -163,6 +171,41 @@ describe('addition of a new note', () => {
 
     expect(blogsAfterPost).toHaveLength(helper.initialBlogs.length);
 
+  });
+
+  test('blog without authentication fails with status code 401', async () => {
+    const newBlog = {
+      title: "A test title",
+      author: "A test author",
+      userId: "605666e695d5da69f4ffb1e8"
+    };
+
+    await api
+        .post('/api/blogs')
+        .send(newBlog)
+        .expect(401);
+
+    const blogsAfterPost = await helper.blogsInDb();
+
+    expect(blogsAfterPost).toHaveLength(helper.initialBlogs.length);
+  });
+
+  test('blog with incorrect authentication fails with status code 403', async () => {
+    const newBlog = {
+      title: "A test title",
+      author: "A test author",
+      userId: "605666e695d5da69f4ffb1e8"
+    };
+
+    await api
+        .post('/api/blogs')
+        .set('Authorization', 'some other token')
+        .send(newBlog)
+        .expect(401);
+
+    const blogsAfterPost = await helper.blogsInDb();
+
+    expect(blogsAfterPost).toHaveLength(helper.initialBlogs.length);
   });
 });
 
@@ -173,6 +216,7 @@ describe('deletion of a blog', () => {
 
     await api
           .delete(`/api/blogs/${blogToDelete.id}`)
+          .set('Authorization', authToken)
           .expect(204);
 
     const blogsAfterDelete = await helper.blogsInDb();
@@ -188,11 +232,39 @@ describe('deletion of a blog', () => {
 
     await api
           .delete(`/api/blogs/${blogIdToDelete}`)
+          .set('Authorization', authToken)
           .expect(204);
 
     const blogsAfterDelete = await helper.blogsInDb();
     expect(blogsAfterDelete).toHaveLength(helper.initialBlogs.length);
 
+  });
+
+  test('fails without authentication fails with status code 401', async () => {
+    const blogs = await helper.blogsInDb();
+    const blogToDelete = blogs[0];
+
+    await api
+        .delete(`/api/blogs/${blogToDelete.id}`)
+        .expect(401);
+
+    const blogsAfterPost = await helper.blogsInDb();
+
+    expect(blogsAfterPost).toHaveLength(helper.initialBlogs.length);
+  });
+
+  test('fails with incorrect authentication fails with status code 403', async () => {
+    const blogs = await helper.blogsInDb();
+    const blogToDelete = blogs[0];
+
+    await api
+        .delete(`/api/blogs/${blogToDelete.id}`)
+        .set('Authorization', 'some other token')
+        .expect(401);
+
+    const blogsAfterPost = await helper.blogsInDb();
+
+    expect(blogsAfterPost).toHaveLength(helper.initialBlogs.length);
   });
 });
 

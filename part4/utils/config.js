@@ -8,8 +8,10 @@ process.env.PROD_MONGO_DB_URL
 :
 process.env.DEV_MONGO_DB_URL
 ;
+const SECRET = process.env.SECRET;
 
 module.exports = {
   MONGO_DB_URL,
-  PORT
+  PORT,
+  SECRET
 }

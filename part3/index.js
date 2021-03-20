@@ -54,6 +54,33 @@ app.post('/api/persons', (request, response) => {
   });
 });
 
+app.put('/api/persons/:id', (request, response) => {
+  const body = request.body;
+
+  if(!body.name)
+  {
+    return response.status(400).json({
+      error: 'name missing'
+    });
+  }else if(!body.number)
+  {
+    return response.status(400).json({
+      error: 'number missing'
+    });
+  }
+
+  const number = {
+    name: body.name,
+    number: body.number
+  };
+
+  Number.findByIdAndUpdate(request.params.id, number, { new: true })
+  .then(updatedNumber => {
+    response.json(updatedNumber);
+  })
+  .catch(error => next(error));
+});
+
 const errorHandler = (error, request, response, next) => {
   console.error(error.message);
 

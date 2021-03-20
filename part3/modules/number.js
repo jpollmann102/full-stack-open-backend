@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const uniqueValidator = require('mongoose-unique-validator');
 require('dotenv').config();
 
 const url = process.env.MONGO_DB_URL;
@@ -14,9 +15,19 @@ mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true, useFind
 
 // declare our Number Schema (interface)
 const numberSchema = new mongoose.Schema({
-  name: String,
-  number: String
+  name: {
+    type: String,
+    minlength: 1,
+    required: true,
+    unique: true
+  },
+  number: {
+    type: String,
+    minlength: 10,
+    required: true
+  }
 });
+numberSchema.plugin(uniqueValidator);
 
 numberSchema.set('toJSON', {
   transform: (document, returnedObject) => {

@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-require('dotenv').config();
 
 const blogSchema = new mongoose.Schema({
   title: {
@@ -18,6 +17,9 @@ const blogSchema = new mongoose.Schema({
   url: {
     type: String,
     required: true
+  },
+  comments: {
+    type: [String]
   },
   likes: {
     type: Number,

@@ -19,6 +19,30 @@ blogsRouter.get('/:id', async (request, response) => {
   response.json(blogs);
 });
 
+blogsRouter.post('/:id/comments', async (request, response) => {
+  const body = request.body;
+
+  if(!body.comment || body.comment.length === 0) return response.status(400).end();
+
+  const blog = await Blog.findById(request.params.id);
+
+  if(blog === null) return response.status(404).end();
+
+  const newComments = {
+    title: blog.title,
+    user: blog.user,
+    author: blog.author,
+    url: blog.url,
+    comments: blog.comments.concat(body.comment)
+  }
+
+  const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, newComments, { new: true });
+
+  await updatedBlog.populate('user', { username: 1, name: 1 }).execPopulate();
+
+  response.status(201).json(updatedBlog);
+});
+
 blogsRouter.post('/', middleware.extractUser, async (request, response) => {
   const body = request.body;
 
@@ -32,7 +56,8 @@ blogsRouter.post('/', middleware.extractUser, async (request, response) => {
     title: body.title,
     user: user._id,
     author: body.author,
-    url: body.url
+    url: body.url,
+    comments: []
   });
 
   const savedBlog = await blog.save();
@@ -75,10 +100,9 @@ blogsRouter.put('/:id', async (request, response, next) => {
 
   const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, blog, { new: true });
 
-  const sendBack = await Blog.findById(updatedBlog._id)
-                             .populate('user', { username: 1, name: 1 });
+  await updatedBlog.populate('user', { username: 1, name: 1 }).execPopulate();
 
-  response.json(sendBack);
+  response.json(updatedBlog);
 });
 
 module.exports = blogsRouter;
